@@ -1,5 +1,7 @@
 #![allow(dead_code)] // TODO
 
+use std::fmt::{Debug, Write};
+
 #[derive(Clone, Copy)]
 enum Color {
     White,
@@ -8,12 +10,36 @@ enum Color {
 
 #[derive(Clone, Copy)]
 enum ChessPiece {
-    Pawn(Color),
+    King(Color),
+    Queen(Color),
     Rook(Color),
     Bishop(Color),
     Knight(Color),
-    King(Color),
-    Queen(Color),
+    Pawn(Color),
+}
+
+impl Debug for ChessPiece {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use Color::*;
+
+        f.write_char(match self {
+            // whites
+            Self::King(White) => '\u{2654}',
+            Self::Queen(White) => '\u{2655}',
+            Self::Rook(White) => '\u{2656}',
+            Self::Bishop(White) => '\u{2657}',
+            Self::Knight(White) => '\u{2658}',
+            Self::Pawn(White) => '\u{2659}',
+
+            // blacks
+            Self::King(Black) => '\u{265a}',
+            Self::Queen(Black) => '\u{265b}',
+            Self::Rook(Black) => '\u{265c}',
+            Self::Bishop(Black) => '\u{265d}',
+            Self::Knight(Black) => '\u{265e}',
+            Self::Pawn(Black) => '\u{265f}',
+        })
+    }
 }
 
 struct ChessBoard {
@@ -37,6 +63,13 @@ impl ChessBoard {
     }
 
     /*
+     * remove the piece in a certain square
+     */
+    fn set_none(&mut self, row: usize, column: usize) {
+        self.state[row * 8 + column] = None;
+    }
+
+    /*
      * create a new empty ChessBoard
      */
     fn new_empty() -> ChessBoard {
@@ -52,7 +85,7 @@ impl ChessBoard {
 
         let mut board = ChessBoard::new_empty();
 
-        for (first_row_index, color) in [(0, White), (7, Black)] {
+        for (first_row_index, second_row_index, color) in [(0, 1, White), (7, 6, Black)] {
             let piece_order = [
                 Rook(color),
                 Knight(color),
@@ -66,10 +99,30 @@ impl ChessBoard {
 
             for (i, &piece) in piece_order.iter().enumerate() {
                 board.set(first_row_index, i, piece);
+                board.set(second_row_index, i, Pawn(color))
             }
         }
 
         board
+    }
+}
+
+impl Debug for ChessBoard {
+
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
+        for i in 0..8 {
+            for j in 0..8 {
+                if let Some(p) = self.get(i, j) {
+                    write!(f, "{:?} ", p)?;
+                }
+                else {
+                    f.write_str("- ")?;
+                }
+            }
+            f.write_char('\n')?;
+        }
+        Ok(())
     }
 }
 
