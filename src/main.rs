@@ -1,5 +1,7 @@
 mod chess;
+use chess::ChessBoard;
 
 fn main() {
-    println!("Hello, Chess!");
+    let c: ChessBoard = ChessBoard::new_traditional();
+    println!("{:?}", c);
 }

@@ -42,7 +42,7 @@ impl Debug for ChessPiece {
     }
 }
 
-struct ChessBoard {
+pub struct ChessBoard {
     state: [Option<ChessPiece>; 64],
 }
 
@@ -79,13 +79,13 @@ impl ChessBoard {
     /*
      * create a new ChessBoard with traditional pieces
      */
-    fn new_traditional() -> ChessBoard {
+    pub fn new_traditional() -> ChessBoard {
         use ChessPiece::*;
         use Color::*;
 
         let mut board = ChessBoard::new_empty();
 
-        for (first_row_index, second_row_index, color) in [(0, 1, White), (7, 6, Black)] {
+        for (first_row_index, second_row_index, color) in [(7, 6, White), (0, 1, Black)] {
             let piece_order = [
                 Rook(color),
                 Knight(color),
