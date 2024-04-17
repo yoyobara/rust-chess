@@ -1,5 +1,8 @@
+mod chessboard;
+mod debug;
 mod chess;
-use chess::ChessBoard;
+
+use chessboard::ChessBoard;
 
 fn main() {
     let c: ChessBoard = ChessBoard::new_traditional();
