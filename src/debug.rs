@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Write};
-use crate::chessboard::{ChessBoard, ChessPiece, Color};
+use crate::{chessboard::{ChessBoard, ChessPiece, Color, Spot}, spot};
 
 impl Debug for ChessPiece {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -31,7 +31,7 @@ impl Debug for ChessBoard {
 
         for i in 0..8 {
             for j in 0..8 {
-                if let Some(p) = self.get(i, j) {
+                if let Some(p) = self.get(spot!(i, j)) {
                     write!(f, "{:?} ", p)?;
                 }
                 else {
