@@ -1,27 +1,27 @@
 use std::fmt::{Debug, Write};
-use crate::{chessboard::{ChessBoard, ChessPiece, Color, Spot}, spot};
+use crate::{chessboard::{ChessBoard, ChessPiece, Color, Spot, ChessPieceType}, spot};
 
 impl Debug for ChessPiece {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use Color::*;
+        use ChessPieceType::*;
 
-        f.write_char(match self {
+        let mut unicode: u32 = match self.piece_type {
             // whites
-            Self::King(White) => '\u{2654}',
-            Self::Queen(White) => '\u{2655}',
-            Self::Rook(White) => '\u{2656}',
-            Self::Bishop(White) => '\u{2657}',
-            Self::Knight(White) => '\u{2658}',
-            Self::Pawn(White) => '\u{2659}',
+            King => 0x2654,
+            Queen => 0x2655,
+            Rook => 0x2656,
+            Bishop => 0x2657,
+            Knight => 0x2658,
+            Pawn => 0x2659,
+        };
 
-            // blacks
-            Self::King(Black) => '\u{265a}',
-            Self::Queen(Black) => '\u{265b}',
-            Self::Rook(Black) => '\u{265c}',
-            Self::Bishop(Black) => '\u{265d}',
-            Self::Knight(Black) => '\u{265e}',
-            Self::Pawn(Black) => '\u{265f}',
-        })
+        // if black increase by 6 (look at unicde table, black pieces come exactly after white)
+        if self.color == Black {
+            unicode += 6;
+        }
+
+        f.write_char(char::from_u32(unicode).unwrap())
     }
 }
 

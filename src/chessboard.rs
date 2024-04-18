@@ -1,17 +1,33 @@
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Color {
     White,
     Black,
 }
 
 #[derive(Clone, Copy)]
-pub enum ChessPiece {
-    King(Color),
-    Queen(Color),
-    Rook(Color),
-    Bishop(Color),
-    Knight(Color),
-    Pawn(Color),
+pub enum ChessPieceType {
+    King,
+    Queen,
+    Rook,
+    Bishop,
+    Knight,
+    Pawn,
+}
+
+#[derive(Clone, Copy)]
+pub struct ChessPiece {
+    pub piece_type: ChessPieceType,
+    pub color: Color,
+}
+
+/*
+ * easily create a piece from type and color
+ */
+#[macro_export] 
+macro_rules! piece {
+    ($type:expr, $color:expr) => {
+        (ChessPiece{piece_type: $type, color: $color})
+    };
 }
 
 #[derive(Clone)]
@@ -70,28 +86,29 @@ impl ChessBoard {
      * create a new ChessBoard with traditional pieces
      */
     pub fn new_traditional() -> ChessBoard {
-        use ChessPiece::*;
+        use ChessPieceType::*;
         use Color::*;
+
+        const PIECE_ORDER: [ChessPieceType; 8] = [
+            Rook,
+            Knight,
+            Bishop,
+            Queen,
+            King,
+            Bishop,
+            Knight,
+            Rook,
+        ];
 
         let mut board = ChessBoard::new_empty();
 
         for (first_row_index, second_row_index, color) in [(7i32, 6, White), (0i32, 1, Black)] {
-            let piece_order = [
-                Rook(color),
-                Knight(color),
-                Bishop(color),
-                Queen(color),
-                King(color),
-                Bishop(color),
-                Knight(color),
-                Rook(color),
-            ];
 
-            for (i, &piece) in piece_order.iter().enumerate() {
+            for (i, &piece_type) in PIECE_ORDER.iter().enumerate() {
                 let i = i as i32;
 
-                board.set(spot!(first_row_index, i), piece);
-                board.set(spot!(second_row_index, i), Pawn(color));
+                board.set(spot!(first_row_index, i), piece!(piece_type, color));
+                board.set(spot!(second_row_index, i), piece!(Pawn, color));
             }
         }
 
