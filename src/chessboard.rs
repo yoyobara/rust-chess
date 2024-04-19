@@ -4,6 +4,17 @@ pub enum Color {
     Black,
 }
 
+impl Color {
+    // black -> white, white -> black
+    pub fn invert(self) -> Self {
+        if self == Self::Black {
+            Self::White
+        } else {
+            Self::Black
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 pub enum ChessPieceType {
     King,
