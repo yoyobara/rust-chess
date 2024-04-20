@@ -1,3 +1,5 @@
+use std::ops::RangeBounds;
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Color {
     White,
@@ -51,6 +53,20 @@ pub struct ChessBoard {
 pub struct Spot {
     pub row: i32,
     pub column: i32
+}
+
+impl Spot {
+    /*
+     * get a spot relative to another spot
+     */
+    pub fn mv(&self, drow: i32, dcol: i32) -> Spot {
+        Spot { row: self.row + drow, column: self.column + dcol }
+    }
+
+    pub fn bounded(&self) -> bool {
+        let r = 0..7;
+        r.contains(&self.row) && r.contains(&self.column)
+    }
 }
 
 /*
