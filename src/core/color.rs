@@ -2,8 +2,8 @@ use std::ops::Not;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Color {
-	White,
-	Black,
+	White = 0,
+	Black = 1,
 }
 
 impl Not for Color {

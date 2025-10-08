@@ -2,12 +2,12 @@ use super::color::Color;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum PieceType {
-	Pawn,
-	Rook,
-	Knight,
-	Bishop,
-	King,
-	Queen
+	Pawn = 0,
+	Rook = 1,
+	Knight = 2,
+	Bishop = 3,
+	King = 4,
+	Queen = 5
 }
 
 impl PieceType {
