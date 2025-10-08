@@ -1,7 +1,7 @@
 use super::color::Color;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-enum PieceType {
+pub enum PieceType {
 	Pawn,
 	Rook,
 	Knight,
@@ -11,7 +11,7 @@ enum PieceType {
 }
 
 impl PieceType {
-	const fn to_ascii(self) -> char {
+	pub const fn to_ascii(self) -> char {
 		match self {
 		    PieceType::Pawn => 'p',
 		    PieceType::Rook => 'r',
@@ -24,13 +24,16 @@ impl PieceType {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-struct Piece(PieceType, Color);
+pub struct Piece{
+	pub piece_type: PieceType,
+	pub piece_color: Color
+}
 
 impl Piece {
-	const fn to_ascii(self) -> char {
-		let letter = self.0.to_ascii(); 
+	pub const fn to_ascii(self) -> char {
+		let letter = self.piece_type.to_ascii(); 
 
-		match self.1 {
+		match self.piece_color {
 		    Color::White => letter.to_ascii_uppercase(),
 		    Color::Black => letter,
 		}
