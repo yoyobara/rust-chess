@@ -12,13 +12,15 @@ pub enum PieceType {
 
 impl PieceType {
 	pub const fn to_ascii(self) -> char {
+		use PieceType::*;
+
 		match self {
-		    PieceType::Pawn => 'p',
-		    PieceType::Rook => 'r',
-		    PieceType::Knight => 'n',
-		    PieceType::Bishop => 'b',
-		    PieceType::King => 'k',
-		    PieceType::Queen => 'q',
+		    Pawn => 'p',
+		    Rook => 'r',
+		    Knight => 'n',
+		    Bishop => 'b',
+		    King => 'k',
+		    Queen => 'q',
 		}
 	}
 }
@@ -30,6 +32,10 @@ pub struct Piece{
 }
 
 impl Piece {
+	pub const fn new(piece_type: PieceType, piece_color: Color) -> Self {
+		Piece {piece_type, piece_color}
+	}
+
 	pub const fn to_ascii(self) -> char {
 		let letter = self.piece_type.to_ascii(); 
 
