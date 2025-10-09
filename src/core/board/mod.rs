@@ -42,7 +42,20 @@ impl Board {
         new_board
     }
 
-    pub fn get_castling_rights(&self, color: Color) -> PlayerCastlingRights {
-    	self.castling_rights[color as usize]
+    pub const fn get_castling_rights(&self, color: Color) -> PlayerCastlingRights {
+        self.castling_rights[color as usize]
+    }
+
+    pub fn pretty_print(&self) {
+        for row in self.state.iter().rev() {
+            println!("+---+---+---+---+---+---+---+---+");
+            for &piece in row {
+                let symbol = piece.map(|p| p.to_ascii()).unwrap_or(' ');
+
+                print!("| {} ", symbol);
+            }
+            println!("|");
+        }
+        println!("+---+---+---+---+---+---+---+---+");
     }
 }
