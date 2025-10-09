@@ -1,6 +1,6 @@
 use rust_chess::core::{
     color::Color,
-    piece::{Piece, PieceType},
+    piece::{Piece, PieceType}, square::Square,
 };
 
 #[test]
@@ -16,4 +16,11 @@ fn piece_testing() {
 
     piece.piece_color = !piece.piece_color;
     assert_eq!(piece.to_ascii(), 'q');
+}
+
+#[test]
+fn square_testing() {
+    assert_eq!(Square(0, 0).name(), "a1");
+    assert_eq!(Square(7, 7).name(), "h8");
+    assert_eq!(Square(3, 4).name(), "d5");
 }

@@ -47,9 +47,9 @@ impl Board {
     }
 
     pub fn pretty_print(&self) {
-        for row in self.state.iter().rev() {
+        for row in self.state {
             println!("+---+---+---+---+---+---+---+---+");
-            for &piece in row {
+            for piece in row {
                 let symbol = piece.map(|p| p.to_ascii()).unwrap_or(' ');
 
                 print!("| {} ", symbol);
