@@ -20,7 +20,6 @@ fn piece_testing() {
 
 #[test]
 fn square_testing() {
-    assert_eq!(Square(0, 0).name(), "a1");
-    assert_eq!(Square(7, 7).name(), "h8");
-    assert_eq!(Square(3, 4).name(), "d5");
+    assert_eq!(Square::F5.to_index(), 37);
+    assert_eq!(Square::F5, Square::from_index(37));
 }
