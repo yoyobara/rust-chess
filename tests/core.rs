@@ -1,6 +1,5 @@
 use rust_chess::core::{
-    color::Color,
-    piece::{Piece, PieceType}, square::Square,
+    board::Board, color::Color, piece::{Piece, PieceType}, square::Square
 };
 
 #[test]
@@ -22,4 +21,11 @@ fn piece_testing() {
 fn square_testing() {
     assert_eq!(Square::F5.to_index(), 37);
     assert_eq!(Square::F5, Square::from_index(37));
+}
+
+#[test]
+fn exers() {
+    let b: Board = Board::new();
+
+    b.pretty_print();
 }

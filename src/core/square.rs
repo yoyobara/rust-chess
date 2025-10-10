@@ -19,7 +19,10 @@ impl Square {
     }
 
     pub const fn from_index(i: u8) -> Self {
-        unsafe { mem::transmute(i) }
+        match i {
+            0..64 => unsafe { mem::transmute(i) },
+            _ => panic!("index should be between 0 and 63 (inclusive)")
+        }
     }
 
     pub const fn rank(self) -> u8 {

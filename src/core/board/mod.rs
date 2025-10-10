@@ -2,7 +2,7 @@ use crate::core::piece::PieceType::{self, *};
 
 use super::{color::Color, piece::Piece};
 
-type BoardState = [[Option<Piece>; 8]; 8];
+type BoardState = [Option<Piece>; 64];
 
 #[derive(Copy, Clone)]
 pub struct PlayerCastlingRights {
@@ -30,27 +30,32 @@ impl Board {
 
     fn get_initial_state() -> BoardState {
         const FIRST_ROW: [PieceType; 8] = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
-        const SECOND_ROW: [PieceType; 8] = [Pawn; 8];
 
-        let mut new_board = [[None; 8]; 8];
+        let mut new_board: BoardState = [None; 64];
 
-        new_board[0] = FIRST_ROW.map(|t| Some(Piece::new(t, Color::White)));
-        new_board[1] = SECOND_ROW.map(|t| Some(Piece::new(t, Color::White)));
-        new_board[7] = FIRST_ROW.map(|t| Some(Piece::new(t, Color::Black)));
-        new_board[6] = SECOND_ROW.map(|t| Some(Piece::new(t, Color::Black)));
+        for i in 0..8 {
+            new_board[i] = Some(Piece::new(FIRST_ROW[i], Color::White));
+            new_board[8 + i] = Some(Piece::new(Pawn, Color::White));
+            new_board[48 + i] = Some(Piece::new(Pawn, Color::Black));
+            new_board[56 + i] = Some(Piece::new(FIRST_ROW[i], Color::Black));
+        }
 
         new_board
     }
+
+    // pub fn get_psuedo_legal_moves(&self) {
+    //     let current_turn_squares = self.state.iter().map(|x| x);
+    // }
 
     pub const fn get_castling_rights(&self, color: Color) -> PlayerCastlingRights {
         self.castling_rights[color as usize]
     }
 
     pub fn pretty_print(&self) {
-        for row in self.state {
+        for i in (0..8).rev() {
             println!("+---+---+---+---+---+---+---+---+");
-            for piece in row {
-                let symbol = piece.map(|p| p.to_ascii()).unwrap_or(' ');
+            for j in 0..8 {
+                let symbol = self.state[i * 8 + j].map(|p| p.to_ascii()).unwrap_or(' ');
 
                 print!("| {} ", symbol);
             }
