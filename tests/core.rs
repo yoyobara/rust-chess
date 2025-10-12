@@ -1,6 +1,8 @@
 use rust_chess::core::{
+    board::Board,
     color::Color,
     piece::{Piece, PieceType},
+    square::Square,
 };
 
 #[test]
@@ -16,4 +18,29 @@ fn piece_testing() {
 
     piece.piece_color = !piece.piece_color;
     assert_eq!(piece.to_ascii(), 'q');
+}
+
+#[test]
+fn square_testing() {
+    assert_eq!(Square::F5.to_index(), 37);
+    assert_eq!(Square::from_index(37), Some(Square::F5));
+
+    assert_eq!(Square::F5.to_file_rank(), (5, 4));
+    assert_eq!(Square::from_file_rank((5, 4)), Some(Square::F5));
+
+    assert_eq!(Square::F5.get_relative_square(1, -2), Some(Square::G3));
+    assert_eq!(Square::A1.get_relative_square(2, 5), Some(Square::C6));
+}
+#[test]
+fn square_testing_negative() {
+    assert_eq!(Square::from_index(100), None);
+    assert_eq!(Square::from_file_rank((2, 8)), None);
+}
+
+#[test]
+fn exers() {
+    let b: Board = Board::new();
+
+    b.pretty_print();
+    println!("{:?}", b.get_psuedo_legal_moves());
 }
