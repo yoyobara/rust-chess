@@ -1,23 +1,22 @@
 use crate::core::{
-    piece::PieceType::{self, *},
+    color::Color,
+    piece::{Piece, PieceType},
     square::{ALL_SQUARES, Square},
 };
 
-use super::{color::Color, piece::Piece};
-
 type BoardState = [Option<Piece>; 64];
-
-#[derive(Copy, Clone)]
-pub struct PlayerCastlingRights {
-    pub queenside: bool,
-    pub kingside: bool,
-}
 
 #[derive(Debug, Copy, Clone)]
 pub struct Move {
     pub from: Square,
     pub to: Square,
     pub promotion: Option<PieceType>,
+}
+
+#[derive(Copy, Clone)]
+pub struct PlayerCastlingRights {
+    pub queenside: bool,
+    pub kingside: bool,
 }
 
 pub struct Board {
@@ -43,6 +42,8 @@ impl Board {
     }
 
     fn get_initial_state() -> BoardState {
+        use PieceType::*;
+
         const FIRST_ROW: [PieceType; 8] = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
 
         let mut new_board: BoardState = [None; 64];
@@ -63,7 +64,7 @@ impl Board {
         for src_square in ALL_SQUARES {
             if let Some(piece) = self.get(src_square) {
                 if piece.piece_color == self.turn {
-                    let piece_moves = piece.get_psuedo_legal_moves(src_square, self);
+                    let piece_moves: Vec<Move> = vec![]; // TODO
                     moves.extend(piece_moves);
                 }
             }
