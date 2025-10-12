@@ -1,4 +1,5 @@
 use rust_chess::core::{
+    board::Board,
     color::Color,
     piece::{Piece, PieceType},
     square::Square,
@@ -36,10 +37,10 @@ fn square_testing_negative() {
     assert_eq!(Square::from_file_rank((2, 8)), None);
 }
 
-// #[test]
-// fn exers() {
-//     let b: Board = Board::new();
+#[test]
+fn exers() {
+    let b: Board = Board::new();
 
-//     b.pretty_print();
-//     b.get_psuedo_legal_moves();
-// }
+    b.pretty_print();
+    println!("{:?}", b.get_psuedo_legal_moves());
+}

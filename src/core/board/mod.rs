@@ -1,4 +1,7 @@
-use crate::core::piece::PieceType::{self, *};
+use crate::core::{
+    piece::PieceType::{self, *},
+    square::{ALL_SQUARES, Square},
+};
 
 use super::{color::Color, piece::Piece};
 
@@ -8,6 +11,13 @@ type BoardState = [Option<Piece>; 64];
 pub struct PlayerCastlingRights {
     pub queenside: bool,
     pub kingside: bool,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct Move {
+    pub from: Square,
+    pub to: Square,
+    pub promotion: Option<PieceType>,
 }
 
 pub struct Board {
@@ -28,6 +38,10 @@ impl Board {
         }
     }
 
+    pub const fn get(&self, square: Square) -> &Option<Piece> {
+        &self.state[square.to_index() as usize]
+    }
+
     fn get_initial_state() -> BoardState {
         const FIRST_ROW: [PieceType; 8] = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook];
 
@@ -43,9 +57,20 @@ impl Board {
         new_board
     }
 
-    // pub fn get_psuedo_legal_moves(&self) {
-    //     let current_turn_squares = self.state.iter().map(|x| x);
-    // }
+    pub fn get_psuedo_legal_moves(&self) -> Vec<Move> {
+        let mut moves = Vec::new();
+
+        for src_square in ALL_SQUARES {
+            if let Some(piece) = self.get(src_square) {
+                if piece.piece_color == self.turn {
+                    let piece_moves = piece.get_psuedo_legal_moves(src_square, self);
+                    moves.extend(piece_moves);
+                }
+            }
+        }
+
+        moves
+    }
 
     pub const fn get_castling_rights(&self, color: Color) -> PlayerCastlingRights {
         self.castling_rights[color as usize]
