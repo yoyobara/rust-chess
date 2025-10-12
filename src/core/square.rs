@@ -1,7 +1,7 @@
-use std::mem;
+use self::Square::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[repr(u8)]
+#[repr(i8)]
 pub enum Square {
     A1, B1, C1, D1, E1, F1, G1, H1,
     A2, B2, C2, D2, E2, F2, G2, H2,
@@ -13,23 +13,44 @@ pub enum Square {
     A8, B8, C8, D8, E8, F8, G8, H8,
 }
 
-impl Square {
-    pub const fn to_index(self) -> u8 {
-        self as u8
-    }
+pub const ALL_SQUARES: [Square; 64] = [
+    A1, B1, C1, D1, E1, F1, G1, H1,
+    A2, B2, C2, D2, E2, F2, G2, H2,
+    A3, B3, C3, D3, E3, F3, G3, H3,
+    A4, B4, C4, D4, E4, F4, G4, H4,
+    A5, B5, C5, D5, E5, F5, G5, H5,
+    A6, B6, C6, D6, E6, F6, G6, H6,
+    A7, B7, C7, D7, E7, F7, G7, H7,
+    A8, B8, C8, D8, E8, F8, G8, H8,
+];
 
-    pub const fn from_index(i: u8) -> Self {
+impl Square {
+    pub const fn from_index(i: i8) -> Option<Self> {
         match i {
-            0..64 => unsafe { mem::transmute(i) },
-            _ => panic!("index should be between 0 and 63 (inclusive)")
+            0..64 => Some(ALL_SQUARES[i as usize]),
+            _ => None
         }
     }
 
-    pub const fn rank(self) -> u8 {
-    	self.to_index() / 8
+    pub const fn from_file_rank(file_rank: (i8, i8)) -> Option<Self> {
+        let (file, rank) = file_rank;
+
+        Self::from_index(rank * 8 + file)
     }
 
-    pub const fn file(self) -> u8 {
-    	self.to_index() % 8
+    pub const fn to_index(self) -> i8 {
+        self as i8
+    }
+
+    pub const fn to_file_rank(self) -> (i8, i8) {
+        let index = self.to_index();
+
+        (index % 8, index / 8)
+    }
+
+    pub const fn get_relative_square(self, delta_file: i8, delta_rank: i8) -> Option<Self> {
+        let (file, rank) = self.to_file_rank();
+
+        Self::from_file_rank((file + delta_file, rank + delta_rank))
     }
 }
