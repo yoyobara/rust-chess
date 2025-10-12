@@ -1,17 +1,11 @@
 use crate::core::{
+    chess_move::Move,
     color::Color,
     piece::{Piece, PieceType},
     square::{ALL_SQUARES, Square},
 };
 
 type BoardState = [Option<Piece>; 64];
-
-#[derive(Debug, Copy, Clone)]
-pub struct Move {
-    pub from: Square,
-    pub to: Square,
-    pub promotion: Option<PieceType>,
-}
 
 #[derive(Copy, Clone)]
 pub struct PlayerCastlingRights {
