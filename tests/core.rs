@@ -1,5 +1,7 @@
 use rust_chess::core::{
-    color::Color, piece::{Piece, PieceType}, square::Square
+    color::Color,
+    piece::{Piece, PieceType},
+    square::Square,
 };
 
 #[test]
@@ -33,7 +35,6 @@ fn square_testing_negative() {
     assert_eq!(Square::from_index(100), None);
     assert_eq!(Square::from_file_rank((2, 8)), None);
 }
-
 
 // #[test]
 // fn exers() {
