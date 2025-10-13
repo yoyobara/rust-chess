@@ -31,8 +31,8 @@ impl Board {
         }
     }
 
-    pub const fn get(&self, square: Square) -> &Option<Piece> {
-        &self.state[square.to_index() as usize]
+    pub const fn get(&self, square: Square) -> Option<Piece> {
+        self.state[square.to_index() as usize]
     }
 
     fn get_initial_state() -> BoardState {
@@ -52,21 +52,6 @@ impl Board {
         new_board
     }
 
-    pub fn get_psuedo_legal_moves(&self) -> Vec<Move> {
-        let mut moves = Vec::new();
-
-        for src_square in ALL_SQUARES {
-            if let Some(piece) = self.get(src_square) {
-                if piece.piece_color == self.turn {
-                    let piece_moves: Vec<Move> = vec![]; // TODO
-                    moves.extend(piece_moves);
-                }
-            }
-        }
-
-        moves
-    }
-
     pub const fn get_castling_rights(&self, color: Color) -> PlayerCastlingRights {
         self.castling_rights[color as usize]
     }
@@ -82,5 +67,57 @@ impl Board {
             println!("|");
         }
         println!("+---+---+---+---+---+---+---+---+");
+    }
+
+    pub fn get_psuedo_legal_moves(&self) -> Vec<Move> {
+        use PieceType::*;
+
+        let my_turn_pieces = ALL_SQUARES.iter().filter_map(|&sq| {
+            let piece = self.get(sq)?;
+            if piece.piece_color == self.turn {
+                Some((sq, piece))
+            } else {
+                None
+            }
+        });
+
+        let mut moves = Vec::new();
+
+        for (src_square, piece) in my_turn_pieces {
+            moves.extend(match piece.piece_type {
+                Pawn => self.get_pawn_psuedo_legal_moves(src_square),
+                Bishop => self.get_bishop_psuedo_legal_moves(src_square),
+                Knight => self.get_knight_psuedo_legal_moves(src_square),
+                Rook => self.get_rook_psuedo_legal_moves(src_square),
+                Queen => self.get_queen_psuedo_legal_moves(src_square),
+                King => self.get_king_psuedo_legal_moves(src_square),
+            });
+        }
+
+        moves
+    }
+
+    fn get_pawn_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+        unimplemented!()
+    }
+
+    fn get_bishop_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+        unimplemented!()
+    }
+
+    fn get_knight_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+        unimplemented!()
+    }
+
+    fn get_rook_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+        unimplemented!()
+    }
+
+    fn get_queen_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+        unimplemented!()
+    }
+
+    fn get_king_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+        unimplemented!()
     }
 }

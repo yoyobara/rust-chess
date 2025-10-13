@@ -6,3 +6,13 @@ pub struct Move {
     pub to: Square,
     pub promotion: Option<PieceType>,
 }
+
+impl Move {
+    pub fn new(from: Square, to: Square, promotion: Option<PieceType>) -> Self {
+        Self {
+            from,
+            to,
+            promotion,
+        }
+    }
+}

@@ -93,10 +93,16 @@ impl Square {
         self as i8
     }
 
-    pub const fn to_file_rank(self) -> (i8, i8) {
-        let index = self.to_index();
+    pub const fn file(self) -> i8 {
+        self.to_index() % 8
+    }
 
-        (index % 8, index / 8)
+    pub const fn rank(self) -> i8 {
+        self.to_index() / 8
+    }
+
+    pub const fn to_file_rank(self) -> (i8, i8) {
+        (self.file(), self.rank())
     }
 
     pub const fn get_relative_square(self, delta_file: i8, delta_rank: i8) -> Option<Self> {
