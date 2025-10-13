@@ -7,12 +7,13 @@ use crate::core::{
 
 type BoardState = [Option<Piece>; 64];
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct PlayerCastlingRights {
     pub queenside: bool,
     pub kingside: bool,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Board {
     state: BoardState,
     turn: Color,
@@ -31,8 +32,8 @@ impl Board {
         }
     }
 
-    pub const fn get(&self, square: Square) -> Option<Piece> {
-        self.state[square.to_index() as usize]
+    pub fn get(&self, square: Square) -> Option<&Piece> {
+        self.state[square.to_index() as usize].as_ref()
     }
 
     fn get_initial_state() -> BoardState {
@@ -57,19 +58,27 @@ impl Board {
     }
 
     pub fn pretty_print(&self) {
+        println!("{}", self);
+    }
+}
+
+impl std::fmt::Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for i in (0..8).rev() {
-            println!("+---+---+---+---+---+---+---+---+");
+            writeln!(f, "+---+---+---+---+---+---+---+---+")?;
             for j in 0..8 {
                 let symbol = self.state[i * 8 + j].map(|p| p.to_ascii()).unwrap_or(' ');
 
-                print!("| {} ", symbol);
+                write!(f, "| {} ", symbol)?;
             }
-            println!("|");
+            writeln!(f, "|")?;
         }
-        println!("+---+---+---+---+---+---+---+---+");
+        writeln!(f, "+---+---+---+---+---+---+---+---+")
     }
+}
 
-    pub fn get_psuedo_legal_moves(&self) -> Vec<Move> {
+impl Board {
+    pub fn get_pseudo_legal_moves(&self) -> Vec<Move> {
         use PieceType::*;
 
         let my_turn_pieces = ALL_SQUARES.iter().filter_map(|&sq| {
@@ -85,39 +94,39 @@ impl Board {
 
         for (src_square, piece) in my_turn_pieces {
             moves.extend(match piece.piece_type {
-                Pawn => self.get_pawn_psuedo_legal_moves(src_square),
-                Bishop => self.get_bishop_psuedo_legal_moves(src_square),
-                Knight => self.get_knight_psuedo_legal_moves(src_square),
-                Rook => self.get_rook_psuedo_legal_moves(src_square),
-                Queen => self.get_queen_psuedo_legal_moves(src_square),
-                King => self.get_king_psuedo_legal_moves(src_square),
+                Pawn => self.get_pawn_pseudo_legal_moves(src_square),
+                Bishop => self.get_bishop_pseudo_legal_moves(src_square),
+                Knight => self.get_knight_pseudo_legal_moves(src_square),
+                Rook => self.get_rook_pseudo_legal_moves(src_square),
+                Queen => self.get_queen_pseudo_legal_moves(src_square),
+                King => self.get_king_pseudo_legal_moves(src_square),
             });
         }
 
         moves
     }
 
-    fn get_pawn_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+    fn get_pawn_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
         unimplemented!()
     }
 
-    fn get_bishop_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+    fn get_bishop_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
         unimplemented!()
     }
 
-    fn get_knight_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+    fn get_knight_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
         unimplemented!()
     }
 
-    fn get_rook_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+    fn get_rook_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
         unimplemented!()
     }
 
-    fn get_queen_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+    fn get_queen_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
         unimplemented!()
     }
 
-    fn get_king_psuedo_legal_moves(&self, src_square: Square) -> Vec<Move> {
+    fn get_king_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
         unimplemented!()
     }
 }
