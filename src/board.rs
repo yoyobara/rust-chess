@@ -1,8 +1,15 @@
-use crate::core::{
-    chess_move::Move,
-    color::Color,
-    piece::{Piece, PieceType},
-    square::{ALL_SQUARES, Square},
+use crate::{
+    core::{
+        board_view::BoardView,
+        chess_move::Move,
+        color::Color,
+        piece::{Piece, PieceType},
+        square::{ALL_SQUARES, Square},
+    },
+    movegen::{
+        get_bishop_pseudo_legal_moves, get_king_pseudo_legal_moves, get_knight_pseudo_legal_moves,
+        get_pawn_pseudo_legal_moves, get_queen_pseudo_legal_moves, get_rook_pseudo_legal_moves,
+    },
 };
 
 type BoardState = [Option<Piece>; 64];
@@ -32,8 +39,8 @@ impl Board {
         }
     }
 
-    pub fn get(&self, square: Square) -> Option<&Piece> {
-        self.state[square.to_index() as usize].as_ref()
+    pub fn get(&self, square: Square) -> Option<Piece> {
+        self.state[square.to_index() as usize]
     }
 
     fn get_initial_state() -> BoardState {
@@ -77,6 +84,12 @@ impl std::fmt::Display for Board {
     }
 }
 
+impl BoardView for Board {
+    fn get(&self, square: Square) -> Option<Piece> {
+        self.get(square)
+    }
+}
+
 impl Board {
     pub fn get_pseudo_legal_moves(&self) -> Vec<Move> {
         use PieceType::*;
@@ -94,39 +107,15 @@ impl Board {
 
         for (src_square, piece) in my_turn_pieces {
             moves.extend(match piece.piece_type {
-                Pawn => self.get_pawn_pseudo_legal_moves(src_square),
-                Bishop => self.get_bishop_pseudo_legal_moves(src_square),
-                Knight => self.get_knight_pseudo_legal_moves(src_square),
-                Rook => self.get_rook_pseudo_legal_moves(src_square),
-                Queen => self.get_queen_pseudo_legal_moves(src_square),
-                King => self.get_king_pseudo_legal_moves(src_square),
+                Pawn => get_pawn_pseudo_legal_moves(self, src_square, piece),
+                Bishop => get_bishop_pseudo_legal_moves(self, src_square, piece),
+                Knight => get_knight_pseudo_legal_moves(self, src_square, piece),
+                Rook => get_rook_pseudo_legal_moves(self, src_square, piece),
+                Queen => get_queen_pseudo_legal_moves(self, src_square, piece),
+                King => get_king_pseudo_legal_moves(self, src_square, piece),
             });
         }
 
         moves
-    }
-
-    fn get_pawn_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
-        unimplemented!()
-    }
-
-    fn get_bishop_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
-        unimplemented!()
-    }
-
-    fn get_knight_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
-        unimplemented!()
-    }
-
-    fn get_rook_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
-        unimplemented!()
-    }
-
-    fn get_queen_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
-        unimplemented!()
-    }
-
-    fn get_king_pseudo_legal_moves(&self, src_square: Square) -> Vec<Move> {
-        unimplemented!()
     }
 }
