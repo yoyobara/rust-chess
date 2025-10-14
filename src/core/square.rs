@@ -86,6 +86,10 @@ impl Square {
     pub const fn from_file_rank(file_rank: (i8, i8)) -> Option<Self> {
         let (file, rank) = file_rank;
 
+        if file < 0 || file > 7 || rank < 0 || rank > 7 {
+            return None;
+        }
+
         Self::from_index(rank * 8 + file)
     }
 

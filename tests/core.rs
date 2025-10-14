@@ -29,6 +29,8 @@ fn square_testing() {
 
     assert_eq!(Square::F5.get_relative_square(1, -2), Some(Square::G3));
     assert_eq!(Square::A1.get_relative_square(2, 5), Some(Square::C6));
+
+    assert_eq!(Square::G1.get_relative_square(2, 1), None);
 }
 #[test]
 fn square_testing_negative() {
