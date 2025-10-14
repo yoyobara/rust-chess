@@ -159,7 +159,12 @@ pub fn get_queen_pseudo_legal_moves(
     src_square: Square,
     piece: Piece,
 ) -> Vec<Move> {
-    unimplemented!()
+    let mut moves = Vec::new();
+
+    moves.append(&mut get_bishop_pseudo_legal_moves(board, src_square, piece));
+    moves.append(&mut get_rook_pseudo_legal_moves(board, src_square, piece));
+
+    moves
 }
 
 pub fn get_king_pseudo_legal_moves(
