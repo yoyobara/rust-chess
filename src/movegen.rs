@@ -1,4 +1,10 @@
-use crate::core::{board_view::BoardView, chess_move::Move, piece::{Piece, PieceType}, square::Square};
+use crate::core::{
+    board_view::BoardView,
+    chess_move::Move,
+    color::Color,
+    piece::{Piece, PieceType},
+    square::Square,
+};
 
 pub fn get_pawn_pseudo_legal_moves(
     board: &impl BoardView,
@@ -13,8 +19,8 @@ pub fn get_pawn_pseudo_legal_moves(
 
     // Direction depends on color: white moves +1 rank, black moves -1 rank
     let (forward_dir, start_rank, promotion_rank) = match piece.piece_color {
-        crate::core::color::Color::White => (1, 1, 7),
-        crate::core::color::Color::Black => (-1, 6, 0),
+        Color::White => (1, 1, 7),
+        Color::Black => (-1, 6, 0),
     };
 
     // single forward
@@ -31,9 +37,7 @@ pub fn get_pawn_pseudo_legal_moves(
                 moves.push(Move::new(src_square, dst, None));
                 // double forward from start rank
                 if rank == start_rank {
-                    let dst2 = src_square
-                        .get_relative_square(0, forward_dir * 2)
-                        .unwrap();
+                    let dst2 = src_square.get_relative_square(0, forward_dir * 2).unwrap();
                     if board.get(dst2).is_none() {
                         moves.push(Move::new(src_square, dst2, None));
                     }
