@@ -72,6 +72,10 @@ impl Board {
         self.castling_rights[color as usize]
     }
 
+    pub fn turn_swap(&mut self) {
+        self.turn = !self.turn;
+    }
+
     pub fn pretty_print(&self) {
         println!("{}", self);
     }
@@ -121,7 +125,26 @@ impl Board {
         if let Some(promotion_type) = mv.promotion {
             moved_piece.piece_type = promotion_type;
         }
+
         *self.get_mut(mv.to) = Some(moved_piece);
+        self.turn = !self.turn;
+    }
+
+    pub fn revert_move(&mut self, mv: Move) {
+        let mut moved_piece = self
+            .get_mut(mv.to)
+            .take()
+            .expect("move's destination is empty");
+        assert_eq!(moved_piece.piece_color, !self.turn);
+
+        if let Some(promoted_piece) = mv.promotion {
+            assert_eq!(promoted_piece, moved_piece.piece_type);
+
+            moved_piece.piece_type = PieceType::Pawn;
+        }
+
+        *self.get_mut(mv.to) = mv.captured.map(|cap_type| Piece::new(cap_type, self.turn));
+        *self.get_mut(mv.from) = Some(moved_piece);
     }
 }
 
