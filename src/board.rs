@@ -115,7 +115,7 @@ impl Board {
         }
 
         *self.get_mut(mv.to) = Some(moved_piece);
-        self.turn = !self.turn;
+        self.turn_swap();
     }
 
     pub fn revert_move(&mut self, mv: Move) {
@@ -133,6 +133,7 @@ impl Board {
 
         *self.get_mut(mv.to) = mv.captured.map(|cap_type| Piece::new(cap_type, self.turn));
         *self.get_mut(mv.from) = Some(moved_piece);
+        self.turn_swap();
     }
 
     pub fn get_pseudo_legal_moves(&self) -> Vec<Move> {
@@ -163,7 +164,23 @@ impl Board {
         moves
     }
 
-    fn get_legal_moves(&self) {}
+    pub fn get_legal_moves(&self) -> Vec<Move> {
+        self.get_pseudo_legal_moves()
+            .iter()
+            .copied()
+            .filter(|&mv| {
+                let mut board_clone = self.clone();
+                board_clone.apply_move(mv);
+
+                // check opponent moves after my move
+                board_clone
+                    .get_pseudo_legal_moves()
+                    .iter()
+                    .copied()
+                    .all(|foe_move| foe_move.captured == Some(PieceType::King))
+            })
+            .collect()
+    }
 }
 
 impl std::fmt::Display for Board {
