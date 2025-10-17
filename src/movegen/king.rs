@@ -16,10 +16,15 @@ pub fn get_king_pseudo_legal_moves(
             if let Some(dst) = src_square.get_relative_square(i, j) {
                 if let Some(target_piece) = board.get(dst) {
                     if target_piece.piece_color != piece.piece_color {
-                        moves.push(Move::new(src_square, dst, None));
+                        moves.push(Move::new(
+                            src_square,
+                            dst,
+                            Some(target_piece.piece_type),
+                            None,
+                        ));
                     }
                 } else {
-                    moves.push(Move::new(src_square, dst, None));
+                    moves.push(Move::new(src_square, dst, None, None));
                 }
             }
         }

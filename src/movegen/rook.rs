@@ -13,11 +13,16 @@ pub fn get_rook_pseudo_legal_moves(
         while let Some(dst) = src_square.get_relative_square(i, j) {
             if let Some(target_piece) = board.get(dst) {
                 if target_piece.piece_color != piece.piece_color {
-                    moves.push(Move::new(src_square, dst, None));
+                    moves.push(Move::new(
+                        src_square,
+                        dst,
+                        Some(target_piece.piece_type),
+                        None,
+                    ));
                 }
                 break;
             } else {
-                moves.push(Move::new(src_square, dst, None));
+                moves.push(Move::new(src_square, dst, None, None));
             }
 
             n += 1;
