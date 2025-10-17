@@ -67,30 +67,7 @@ impl Board {
     pub fn pretty_print(&self) {
         println!("{}", self);
     }
-}
 
-impl std::fmt::Display for Board {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for i in (0..8).rev() {
-            writeln!(f, "+---+---+---+---+---+---+---+---+")?;
-            for j in 0..8 {
-                let symbol = self.state[i * 8 + j].map(|p| p.to_ascii()).unwrap_or(' ');
-
-                write!(f, "| {} ", symbol)?;
-            }
-            writeln!(f, "|")?;
-        }
-        writeln!(f, "+---+---+---+---+---+---+---+---+")
-    }
-}
-
-impl BoardView for Board {
-    fn get(&self, square: Square) -> Option<Piece> {
-        self.get(square)
-    }
-}
-
-impl Board {
     pub fn get_pseudo_legal_moves(&self) -> Vec<Move> {
         use PieceType::*;
 
@@ -117,5 +94,26 @@ impl Board {
         }
 
         moves
+    }
+}
+
+impl std::fmt::Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for i in (0..8).rev() {
+            writeln!(f, "+---+---+---+---+---+---+---+---+")?;
+            for j in 0..8 {
+                let symbol = self.state[i * 8 + j].map(|p| p.to_ascii()).unwrap_or(' ');
+
+                write!(f, "| {} ", symbol)?;
+            }
+            writeln!(f, "|")?;
+        }
+        writeln!(f, "+---+---+---+---+---+---+---+---+")
+    }
+}
+
+impl BoardView for Board {
+    fn get(&self, square: Square) -> Option<Piece> {
+        self.get(square)
     }
 }
