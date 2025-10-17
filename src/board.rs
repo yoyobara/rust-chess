@@ -177,7 +177,7 @@ impl Board {
                     .get_pseudo_legal_moves()
                     .iter()
                     .copied()
-                    .all(|foe_move| foe_move.captured == Some(PieceType::King))
+                    .all(|foe_move| foe_move.captured != Some(PieceType::King))
             })
             .collect()
     }
