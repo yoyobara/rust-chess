@@ -43,6 +43,14 @@ impl Board {
         self.state[square.to_index() as usize]
     }
 
+    pub fn get_mut(&mut self, square: Square) -> &mut Option<Piece> {
+        &mut self.state[square.to_index() as usize]
+    }
+
+    pub fn set(&mut self, square: Square, piece: Option<Piece>) {
+        *self.get_mut(square) = piece;
+    }
+
     fn get_initial_state() -> BoardState {
         use PieceType::*;
 
@@ -94,6 +102,26 @@ impl Board {
         }
 
         moves
+    }
+
+    pub fn apply_move(&mut self, mv: Move) {
+        let mut moved_piece = self
+            .get_mut(mv.from)
+            .take()
+            .expect("can't move empty square");
+
+        assert_eq!(moved_piece.piece_color, self.turn);
+
+        let captured_piece = self.get(mv.to);
+        if let Some(p) = captured_piece {
+            assert_eq!(p.piece_color, !self.turn)
+        }
+        assert_eq!(mv.captured, captured_piece.map(|p| p.piece_type));
+
+        if let Some(promotion_type) = mv.promotion {
+            moved_piece.piece_type = promotion_type;
+        }
+        *self.get_mut(mv.to) = Some(moved_piece);
     }
 }
 
