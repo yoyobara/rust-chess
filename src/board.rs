@@ -80,32 +80,20 @@ impl Board {
         println!("{}", self);
     }
 
-    pub fn get_pseudo_legal_moves(&self) -> Vec<Move> {
-        use PieceType::*;
+    pub fn find_piece(&self, piece: Option<Piece>) -> impl Iterator<Item = Square> {
+        ALL_SQUARES
+            .iter()
+            .copied()
+            .filter(move |&sq| self.get(sq) == piece)
+    }
 
-        let my_turn_pieces = ALL_SQUARES.iter().filter_map(|&sq| {
-            let piece = self.get(sq)?;
-            if piece.piece_color == self.turn {
-                Some((sq, piece))
-            } else {
-                None
-            }
-        });
+    pub fn find_king(&self, color: Color) -> Square {
+        let mut king_squares = self.find_piece(Some(Piece::new(PieceType::King, color)));
+        let only_king_square = king_squares.next().expect("king not found");
 
-        let mut moves = Vec::new();
+        assert!(king_squares.next().is_some());
 
-        for (src_square, piece) in my_turn_pieces {
-            moves.extend(match piece.piece_type {
-                Pawn => get_pawn_pseudo_legal_moves(self, src_square, piece),
-                Bishop => get_bishop_pseudo_legal_moves(self, src_square, piece),
-                Knight => get_knight_pseudo_legal_moves(self, src_square, piece),
-                Rook => get_rook_pseudo_legal_moves(self, src_square, piece),
-                Queen => get_queen_pseudo_legal_moves(self, src_square, piece),
-                King => get_king_pseudo_legal_moves(self, src_square, piece),
-            });
-        }
-
-        moves
+        only_king_square
     }
 
     pub fn apply_move(&mut self, mv: Move) {
@@ -146,6 +134,36 @@ impl Board {
         *self.get_mut(mv.to) = mv.captured.map(|cap_type| Piece::new(cap_type, self.turn));
         *self.get_mut(mv.from) = Some(moved_piece);
     }
+
+    pub fn get_pseudo_legal_moves(&self) -> Vec<Move> {
+        use PieceType::*;
+
+        let my_turn_pieces = ALL_SQUARES.iter().filter_map(|&sq| {
+            let piece = self.get(sq)?;
+            if piece.piece_color == self.turn {
+                Some((sq, piece))
+            } else {
+                None
+            }
+        });
+
+        let mut moves = Vec::new();
+
+        for (src_square, piece) in my_turn_pieces {
+            moves.extend(match piece.piece_type {
+                Pawn => get_pawn_pseudo_legal_moves(self, src_square, piece),
+                Bishop => get_bishop_pseudo_legal_moves(self, src_square, piece),
+                Knight => get_knight_pseudo_legal_moves(self, src_square, piece),
+                Rook => get_rook_pseudo_legal_moves(self, src_square, piece),
+                Queen => get_queen_pseudo_legal_moves(self, src_square, piece),
+                King => get_king_pseudo_legal_moves(self, src_square, piece),
+            });
+        }
+
+        moves
+    }
+
+    fn get_legal_moves(&self) {}
 }
 
 impl std::fmt::Display for Board {
