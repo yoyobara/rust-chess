@@ -1,6 +1,6 @@
 use rust_chess::{
     board::Board,
-    core::{chess_move::Move, square::Square::*},
+    core::{chess_move::Move, color::Color, square::Square::*},
 };
 
 #[test]
@@ -14,7 +14,7 @@ fn board_test() {
 
     println!(
         "{:?} {:?}",
-        b.get_pseudo_legal_moves().len(),
-        b.get_legal_moves().len()
+        b.get_all_pseudo_legal_moves(Color::White).len(),
+        b.get_all_legal_moves(Color::White).len()
     );
 }
