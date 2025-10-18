@@ -25,10 +25,15 @@ pub fn get_knight_pseudo_legal_moves(
 
         if let Some(target_piece) = board.get(sq) {
             if target_piece.piece_color != piece.piece_color {
-                moves.push(Move::new(src_square, sq, None));
+                moves.push(Move::new(
+                    src_square,
+                    sq,
+                    Some(target_piece.piece_type),
+                    None,
+                ));
             }
         } else {
-            moves.push(Move::new(src_square, sq, None));
+            moves.push(Move::new(src_square, sq, None, None));
         }
     }
 

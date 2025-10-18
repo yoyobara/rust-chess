@@ -30,10 +30,14 @@ fn square_testing() {
     assert_eq!(Square::F5.get_relative_square(1, -2), Some(Square::G3));
     assert_eq!(Square::A1.get_relative_square(2, 5), Some(Square::C6));
 
-    assert_eq!(Square::G1.get_relative_square(2, 1), None);
+    assert_eq!(format!("{}", Square::B2), "[b2]");
+    assert_eq!(format!("{}", Square::F8), "[f8]");
+    assert_eq!(format!("{}", Square::A1), "[a1]");
+    assert_eq!(format!("{}", Square::D4), "[d4]");
 }
 #[test]
 fn square_testing_negative() {
     assert_eq!(Square::from_index(100), None);
     assert_eq!(Square::from_file_rank((2, 8)), None);
+    assert_eq!(Square::G1.get_relative_square(2, 1), None);
 }

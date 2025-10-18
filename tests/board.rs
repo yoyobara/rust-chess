@@ -1,11 +1,20 @@
-use rust_chess::board::Board;
+use rust_chess::{
+    board::Board,
+    core::{chess_move::Move, square::Square::*},
+};
 
 #[test]
 fn board_test() {
-    let b: Board = Board::new();
-    let v = b.get_pseudo_legal_moves();
+    let mut b: Board = Board::new();
 
-    for mv in v {
-        println!("{:?}", mv);
-    }
+    b.apply_move(Move::new(D2, D3, None, None));
+    b.apply_move(Move::new(E7, E6, None, None));
+    b.apply_move(Move::new(B1, A3, None, None));
+    b.apply_move(Move::new(D8, G5, None, None));
+
+    println!(
+        "{:?} {:?}",
+        b.get_pseudo_legal_moves().len(),
+        b.get_legal_moves().len()
+    );
 }

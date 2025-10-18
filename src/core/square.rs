@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use self::Square::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -113,5 +115,13 @@ impl Square {
         let (file, rank) = self.to_file_rank();
 
         Self::from_file_rank((file + delta_file, rank + delta_rank))
+    }
+}
+
+impl Display for Square {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let file_char = (b'a' + self.file() as u8) as char;
+
+        write!(f, "[{}{}]", file_char, self.rank() + 1)
     }
 }

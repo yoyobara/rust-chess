@@ -29,17 +29,17 @@ pub fn get_pawn_pseudo_legal_moves(
             // promotion when reaching last rank
             if dst.rank() == promotion_rank {
                 // add promotions to Rook, Knight, Bishop, Queen
-                moves.push(Move::new(src_square, dst, Some(Rook)));
-                moves.push(Move::new(src_square, dst, Some(Knight)));
-                moves.push(Move::new(src_square, dst, Some(Bishop)));
-                moves.push(Move::new(src_square, dst, Some(Queen)));
+                moves.push(Move::new(src_square, dst, None, Some(Rook)));
+                moves.push(Move::new(src_square, dst, None, Some(Knight)));
+                moves.push(Move::new(src_square, dst, None, Some(Bishop)));
+                moves.push(Move::new(src_square, dst, None, Some(Queen)));
             } else {
-                moves.push(Move::new(src_square, dst, None));
+                moves.push(Move::new(src_square, dst, None, None));
                 // double forward from start rank
                 if rank == start_rank {
                     let dst2 = src_square.get_relative_square(0, forward_dir * 2).unwrap();
                     if board.get(dst2).is_none() {
-                        moves.push(Move::new(src_square, dst2, None));
+                        moves.push(Move::new(src_square, dst2, None, None));
                     }
                 }
             }
@@ -52,12 +52,37 @@ pub fn get_pawn_pseudo_legal_moves(
             if let Some(target_piece) = board.get(dst) {
                 if target_piece.piece_color != piece.piece_color {
                     if dst.rank() == promotion_rank {
-                        moves.push(Move::new(src_square, dst, Some(Rook)));
-                        moves.push(Move::new(src_square, dst, Some(Knight)));
-                        moves.push(Move::new(src_square, dst, Some(Bishop)));
-                        moves.push(Move::new(src_square, dst, Some(Queen)));
+                        moves.push(Move::new(
+                            src_square,
+                            dst,
+                            Some(target_piece.piece_type),
+                            Some(Rook),
+                        ));
+                        moves.push(Move::new(
+                            src_square,
+                            dst,
+                            Some(target_piece.piece_type),
+                            Some(Knight),
+                        ));
+                        moves.push(Move::new(
+                            src_square,
+                            dst,
+                            Some(target_piece.piece_type),
+                            Some(Bishop),
+                        ));
+                        moves.push(Move::new(
+                            src_square,
+                            dst,
+                            Some(target_piece.piece_type),
+                            Some(Queen),
+                        ));
                     } else {
-                        moves.push(Move::new(src_square, dst, None));
+                        moves.push(Move::new(
+                            src_square,
+                            dst,
+                            Some(target_piece.piece_type),
+                            None,
+                        ));
                     }
                 }
             }

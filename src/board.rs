@@ -43,6 +43,14 @@ impl Board {
         self.state[square.to_index() as usize]
     }
 
+    pub fn get_mut(&mut self, square: Square) -> &mut Option<Piece> {
+        &mut self.state[square.to_index() as usize]
+    }
+
+    pub fn set(&mut self, square: Square, piece: Option<Piece>) {
+        *self.get_mut(square) = piece;
+    }
+
     fn get_initial_state() -> BoardState {
         use PieceType::*;
 
@@ -64,8 +72,68 @@ impl Board {
         self.castling_rights[color as usize]
     }
 
+    pub fn turn_swap(&mut self) {
+        self.turn = !self.turn;
+    }
+
     pub fn pretty_print(&self) {
         println!("{}", self);
+    }
+
+    pub fn find_piece(&self, piece: Option<Piece>) -> impl Iterator<Item = Square> {
+        ALL_SQUARES
+            .iter()
+            .copied()
+            .filter(move |&sq| self.get(sq) == piece)
+    }
+
+    pub fn find_king(&self, color: Color) -> Square {
+        let mut king_squares = self.find_piece(Some(Piece::new(PieceType::King, color)));
+        let only_king_square = king_squares.next().expect("king not found");
+
+        assert!(king_squares.next().is_some());
+
+        only_king_square
+    }
+
+    pub fn apply_move(&mut self, mv: Move) {
+        let mut moved_piece = self
+            .get_mut(mv.from)
+            .take()
+            .expect("can't move empty square");
+
+        assert_eq!(moved_piece.piece_color, self.turn);
+
+        let captured_piece = self.get(mv.to);
+        if let Some(p) = captured_piece {
+            assert_eq!(p.piece_color, !self.turn)
+        }
+        assert_eq!(mv.captured, captured_piece.map(|p| p.piece_type));
+
+        if let Some(promotion_type) = mv.promotion {
+            moved_piece.piece_type = promotion_type;
+        }
+
+        *self.get_mut(mv.to) = Some(moved_piece);
+        self.turn_swap();
+    }
+
+    pub fn revert_move(&mut self, mv: Move) {
+        let mut moved_piece = self
+            .get_mut(mv.to)
+            .take()
+            .expect("move's destination is empty");
+        assert_eq!(moved_piece.piece_color, !self.turn);
+
+        if let Some(promoted_piece) = mv.promotion {
+            assert_eq!(promoted_piece, moved_piece.piece_type);
+
+            moved_piece.piece_type = PieceType::Pawn;
+        }
+
+        *self.get_mut(mv.to) = mv.captured.map(|cap_type| Piece::new(cap_type, self.turn));
+        *self.get_mut(mv.from) = Some(moved_piece);
+        self.turn_swap();
     }
 
     pub fn get_pseudo_legal_moves(&self) -> Vec<Move> {
@@ -94,6 +162,24 @@ impl Board {
         }
 
         moves
+    }
+
+    pub fn get_legal_moves(&self) -> Vec<Move> {
+        self.get_pseudo_legal_moves()
+            .iter()
+            .copied()
+            .filter(|&mv| {
+                let mut board_clone = self.clone();
+                board_clone.apply_move(mv);
+
+                // check opponent moves after my move
+                board_clone
+                    .get_pseudo_legal_moves()
+                    .iter()
+                    .copied()
+                    .all(|foe_move| foe_move.captured != Some(PieceType::King))
+            })
+            .collect()
     }
 }
 
