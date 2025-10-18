@@ -91,7 +91,7 @@ impl Board {
         let mut king_squares = self.find_piece(Some(Piece::new(PieceType::King, color)));
         let only_king_square = king_squares.next().expect("king not found");
 
-        assert!(king_squares.next().is_some());
+        assert!(king_squares.next().is_none());
 
         only_king_square
     }
