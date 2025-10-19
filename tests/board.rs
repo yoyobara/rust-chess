@@ -12,9 +12,6 @@ fn board_test() {
     b.apply_move(Move::new(B1, A3, None, None));
     b.apply_move(Move::new(D8, G5, None, None));
 
-    println!(
-        "{:?} {:?}",
-        b.get_all_pseudo_legal_moves(Color::White).len(),
-        b.get_all_legal_moves(Color::White).len()
-    );
+    assert_eq!(b.get_all_pseudo_legal_moves(Color::White).len(), 25);
+    assert_eq!(b.get_all_legal_moves(Color::White).len(), 24);
 }
