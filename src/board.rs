@@ -143,6 +143,14 @@ impl Board {
             .collect()
     }
 
+    pub fn is_under_check(&self, color: Color) -> bool {
+        let opponent_pseudo_legal_moves = self.get_all_pseudo_legal_moves(!color);
+
+        opponent_pseudo_legal_moves
+            .iter()
+            .any(|mv| mv.captured == Some(PieceType::King))
+    }
+
     pub fn get_legal_moves(&self, square: Square) -> Option<Vec<Move>> {
         let color = self.get(square)?.piece_color;
         let pseudo_legal = self.get_pseudo_legal_moves(square)?;
@@ -154,10 +162,7 @@ impl Board {
                     let mut board_clone = self.clone();
 
                     board_clone.apply_move(mv);
-                    board_clone
-                        .get_all_pseudo_legal_moves(!color)
-                        .iter()
-                        .all(|&mv| mv.captured != Some(PieceType::King))
+                    !board_clone.is_under_check(color)
                 })
                 .copied()
                 .collect(),
