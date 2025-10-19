@@ -20,6 +20,11 @@ pub struct PlayerCastlingRights {
     pub kingside: bool,
 }
 
+pub enum EndgameState {
+    Checkmate,
+    Stalemate,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Board {
     state: BoardState,
@@ -173,6 +178,16 @@ impl Board {
         self.squares_of_piece_color(color)
             .flat_map(|sq| self.get_legal_moves(sq).unwrap())
             .collect()
+    }
+
+    pub fn is_player_under_endgame_state(&self, color: Color) -> Option<EndgameState> {
+        self.get_all_legal_moves(color).is_empty().then(|| {
+            if self.is_under_check(color) {
+                EndgameState::Checkmate
+            } else {
+                EndgameState::Stalemate
+            }
+        })
     }
 
     fn squares_of_piece_color(&self, color: Color) -> impl Iterator<Item = Square> {
