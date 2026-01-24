@@ -3,4 +3,9 @@ name = "rust-chess"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+serde-support = ["serde", "serde-big-array"]
+
 [dependencies]
+serde = { version = "1.0.228", features = ["derive"], optional = true }
+serde-big-array = { version = "0.5.1", optional = true }

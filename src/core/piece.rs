@@ -1,6 +1,10 @@
 use super::color::Color;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(
+    feature = "serde-support",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub enum PieceType {
     Pawn = 0,
     Rook = 1,
@@ -26,6 +30,10 @@ impl PieceType {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(
+    feature = "serde-support",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub struct Piece {
     pub piece_type: PieceType,
     pub piece_color: Color,

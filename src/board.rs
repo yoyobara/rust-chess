@@ -15,6 +15,10 @@ use crate::{
 type BoardState = [Option<Piece>; 64];
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "serde-support",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub struct PlayerCastlingRights {
     pub queenside: bool,
     pub kingside: bool,
@@ -26,8 +30,14 @@ pub enum EndgameState {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "serde-support",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub struct Board {
+    #[cfg_attr(feature = "serde-support", serde(with = "serde_big_array::BigArray"))]
     state: BoardState,
+
     castling_rights: [PlayerCastlingRights; 2],
 }
 
