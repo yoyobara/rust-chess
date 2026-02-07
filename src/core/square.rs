@@ -3,6 +3,10 @@ use std::fmt::Display;
 use self::Square::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[cfg_attr(
+    feature = "serde-support",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 #[repr(i8)]
 pub enum Square {
     A1,
