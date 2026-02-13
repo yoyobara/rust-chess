@@ -1,6 +1,6 @@
 use crate::core::{piece::PieceType, square::Square};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Move {
     pub from: Square,
     pub to: Square,
