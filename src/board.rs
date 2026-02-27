@@ -41,10 +41,22 @@ pub struct Board {
     castling_rights: [PlayerCastlingRights; 2],
 }
 
-impl Board {
-    pub fn new() -> Self {
+impl Default for Board {
+    fn default() -> Self {
         Self {
             state: Self::get_initial_state(),
+            castling_rights: [PlayerCastlingRights {
+                queenside: true,
+                kingside: true,
+            }; 2],
+        }
+    }
+}
+
+impl Board {
+    pub fn empty() -> Self {
+        Self {
+            state: [None; 64],
             castling_rights: [PlayerCastlingRights {
                 queenside: true,
                 kingside: true,

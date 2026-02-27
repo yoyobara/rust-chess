@@ -5,7 +5,7 @@ use rust_chess::{
 
 #[test]
 fn board_test() {
-    let mut b: Board = Board::new();
+    let mut b: Board = Board::default();
 
     b.apply_move(Move::new(D2, D3, None, None));
     b.apply_move(Move::new(E7, E6, None, None));
