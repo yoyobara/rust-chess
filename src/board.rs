@@ -123,30 +123,11 @@ impl Board {
             .take()
             .expect("can't move empty square");
 
-        let captured_piece = self.get(mv.to);
-        assert_eq!(mv.captured, captured_piece.map(|p| p.piece_type));
-
         if let Some(promotion_type) = mv.promotion {
             moved_piece.piece_type = promotion_type;
         }
 
         *self.get_mut(mv.to) = Some(moved_piece);
-    }
-
-    pub fn revert_move(&mut self, mv: Move) {
-        let mut moved_piece = self
-            .get_mut(mv.to)
-            .take()
-            .expect("move's destination is empty");
-
-        if let Some(promoted_piece) = mv.promotion {
-            moved_piece.piece_type = PieceType::Pawn;
-        }
-
-        *self.get_mut(mv.to) = mv
-            .captured
-            .map(|cap_type| Piece::new(cap_type, !moved_piece.piece_color));
-        *self.get_mut(mv.from) = Some(moved_piece);
     }
 
     pub fn get_pseudo_legal_moves(&self, square: Square) -> Option<Vec<Move>> {
@@ -171,11 +152,12 @@ impl Board {
     }
 
     pub fn is_under_check(&self, color: Color) -> bool {
+        let king_square = self.find_king(color);
         let opponent_pseudo_legal_moves = self.get_all_pseudo_legal_moves(!color);
 
         opponent_pseudo_legal_moves
             .iter()
-            .any(|mv| mv.captured == Some(PieceType::King))
+            .any(|mv| mv.to == king_square)
     }
 
     pub fn get_legal_moves(&self, square: Square) -> Option<Vec<Move>> {

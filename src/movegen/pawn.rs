@@ -1,20 +1,20 @@
 use crate::core::{
     board_view::BoardView,
-    chess_move::Move,
+    chess_move::{Move, MoveType},
     color::Color,
     piece::{Piece, PieceType},
     square::Square,
 };
+use PieceType::*;
+
+const PROMOTABLE_PIECE_TYPES: [PieceType; 4] = [Rook, Knight, Bishop, Queen];
 
 pub fn get_pawn_pseudo_legal_moves(
     board: &impl BoardView,
     src_square: Square,
     piece: Piece,
 ) -> Vec<Move> {
-    use PieceType::*;
-
     let mut moves: Vec<Move> = Vec::new();
-
     let (file, rank) = src_square.to_file_rank();
 
     // Direction depends on color: white moves +1 rank, black moves -1 rank
@@ -28,18 +28,21 @@ pub fn get_pawn_pseudo_legal_moves(
         if board.get(dst).is_none() {
             // promotion when reaching last rank
             if dst.rank() == promotion_rank {
-                // add promotions to Rook, Knight, Bishop, Queen
-                moves.push(Move::new(src_square, dst, None, Some(Rook)));
-                moves.push(Move::new(src_square, dst, None, Some(Knight)));
-                moves.push(Move::new(src_square, dst, None, Some(Bishop)));
-                moves.push(Move::new(src_square, dst, None, Some(Queen)));
+                for promotable_piece_type in PROMOTABLE_PIECE_TYPES {
+                    moves.push(Move::new(
+                        src_square,
+                        dst,
+                        Some(promotable_piece_type),
+                        MoveType::Quiet,
+                    ));
+                }
             } else {
-                moves.push(Move::new(src_square, dst, None, None));
+                moves.push(Move::new(src_square, dst, None, MoveType::Quiet));
                 // double forward from start rank
                 if rank == start_rank {
                     let dst2 = src_square.get_relative_square(0, forward_dir * 2).unwrap();
                     if board.get(dst2).is_none() {
-                        moves.push(Move::new(src_square, dst2, None, None));
+                        moves.push(Move::new(src_square, dst2, None, MoveType::Quiet));
                     }
                 }
             }
@@ -52,37 +55,16 @@ pub fn get_pawn_pseudo_legal_moves(
             if let Some(target_piece) = board.get(dst) {
                 if target_piece.piece_color != piece.piece_color {
                     if dst.rank() == promotion_rank {
-                        moves.push(Move::new(
-                            src_square,
-                            dst,
-                            Some(target_piece.piece_type),
-                            Some(Rook),
-                        ));
-                        moves.push(Move::new(
-                            src_square,
-                            dst,
-                            Some(target_piece.piece_type),
-                            Some(Knight),
-                        ));
-                        moves.push(Move::new(
-                            src_square,
-                            dst,
-                            Some(target_piece.piece_type),
-                            Some(Bishop),
-                        ));
-                        moves.push(Move::new(
-                            src_square,
-                            dst,
-                            Some(target_piece.piece_type),
-                            Some(Queen),
-                        ));
+                        for promotable_piece_type in PROMOTABLE_PIECE_TYPES {
+                            moves.push(Move::new(
+                                src_square,
+                                dst,
+                                Some(promotable_piece_type),
+                                MoveType::Capture,
+                            ));
+                        }
                     } else {
-                        moves.push(Move::new(
-                            src_square,
-                            dst,
-                            Some(target_piece.piece_type),
-                            None,
-                        ));
+                        moves.push(Move::new(src_square, dst, None, MoveType::Capture));
                     }
                 }
             }
