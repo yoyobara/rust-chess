@@ -1,6 +1,6 @@
 use crate::{
     core::{
-        chess_move::Move,
+        chess_move::{Move, MoveType},
         color::Color,
         piece::{Piece, PieceType},
         square::{ALL_SQUARES, Square},
@@ -126,6 +126,22 @@ impl Board {
         }
 
         *self.get_mut(mv.to) = Some(moved_piece);
+
+        match (mv.move_type, moved_piece.piece_color) {
+            (MoveType::KingsideCastling, Color::White) => {
+                *self.get_mut(Square::F1) = self.get_mut(Square::H1).take();
+            }
+            (MoveType::QueensideCastling, Color::White) => {
+                *self.get_mut(Square::D1) = self.get_mut(Square::A1).take();
+            }
+            (MoveType::KingsideCastling, Color::Black) => {
+                *self.get_mut(Square::F8) = self.get_mut(Square::H8).take();
+            }
+            (MoveType::QueensideCastling, Color::Black) => {
+                *self.get_mut(Square::D8) = self.get_mut(Square::A8).take();
+            }
+            _ => {}
+        }
 
         match mv.from {
             Square::E1 => {
