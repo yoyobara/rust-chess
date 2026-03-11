@@ -221,4 +221,12 @@ impl BoardView for Board {
     fn get(&self, square: Square) -> Option<Piece> {
         self.get(square)
     }
+
+    fn has_kingside_castling_right(&self, color: Color) -> bool {
+        self.get_castling_rights(color).kingside
+    }
+
+    fn has_queenside_castling_right(&self, color: Color) -> bool {
+        self.get_castling_rights(color).queenside
+    }
 }
