@@ -1,15 +1,13 @@
-use crate::core::{
-    board_view::BoardView,
-    chess_move::{Move, MoveType},
-    piece::Piece,
-    square::Square,
+use crate::{
+    board::Board,
+    core::{
+        chess_move::{Move, MoveType},
+        piece::Piece,
+        square::Square,
+    },
 };
 
-pub fn get_knight_pseudo_legal_moves(
-    board: &impl BoardView,
-    src_square: Square,
-    piece: Piece,
-) -> Vec<Move> {
+pub fn get_knight_pseudo_legal_moves(board: &Board, src_square: Square, piece: Piece) -> Vec<Move> {
     const KNIGHT_MOVES: [(i8, i8); 8] = [
         (-1, 2),
         (-1, -2),

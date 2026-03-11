@@ -1,19 +1,17 @@
-use crate::core::{
-    board_view::BoardView,
-    chess_move::{Move, MoveType},
-    color::Color,
-    piece::{Piece, PieceType},
-    square::Square,
+use crate::{
+    board::Board,
+    core::{
+        chess_move::{Move, MoveType},
+        color::Color,
+        piece::{Piece, PieceType},
+        square::Square,
+    },
 };
 use PieceType::*;
 
 const PROMOTABLE_PIECE_TYPES: [PieceType; 4] = [Rook, Knight, Bishop, Queen];
 
-pub fn get_pawn_pseudo_legal_moves(
-    board: &impl BoardView,
-    src_square: Square,
-    piece: Piece,
-) -> Vec<Move> {
+pub fn get_pawn_pseudo_legal_moves(board: &Board, src_square: Square, piece: Piece) -> Vec<Move> {
     let mut moves: Vec<Move> = Vec::new();
     let (file, rank) = src_square.to_file_rank();
 

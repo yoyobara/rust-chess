@@ -1,6 +1,5 @@
 use crate::{
     core::{
-        board_view::BoardView,
         chess_move::Move,
         color::Color,
         piece::{Piece, PieceType},
@@ -214,19 +213,5 @@ impl std::fmt::Display for Board {
             writeln!(f, "|")?;
         }
         writeln!(f, "+---+---+---+---+---+---+---+---+")
-    }
-}
-
-impl BoardView for Board {
-    fn get(&self, square: Square) -> Option<Piece> {
-        self.get(square)
-    }
-
-    fn has_kingside_castling_right(&self, color: Color) -> bool {
-        self.get_castling_rights(color).kingside
-    }
-
-    fn has_queenside_castling_right(&self, color: Color) -> bool {
-        self.get_castling_rights(color).queenside
     }
 }

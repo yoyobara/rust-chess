@@ -1,15 +1,13 @@
-use crate::core::{
-    board_view::BoardView,
-    chess_move::{Move, MoveType},
-    piece::Piece,
-    square::Square,
+use crate::{
+    board::Board,
+    core::{
+        chess_move::{Move, MoveType},
+        piece::Piece,
+        square::Square,
+    },
 };
 
-pub fn get_bishop_pseudo_legal_moves(
-    board: &impl BoardView,
-    src_square: Square,
-    piece: Piece,
-) -> Vec<Move> {
+pub fn get_bishop_pseudo_legal_moves(board: &Board, src_square: Square, piece: Piece) -> Vec<Move> {
     let mut moves = Vec::new();
 
     for (i, j) in [(-1, -1), (-1, 1), (1, -1), (1, 1)] {
