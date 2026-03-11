@@ -126,6 +126,23 @@ impl Board {
         }
 
         *self.get_mut(mv.to) = Some(moved_piece);
+
+        match mv.from {
+            Square::E1 => {
+                self.set_can_castle(Color::White, CastlingType::Kingside, false);
+                self.set_can_castle(Color::White, CastlingType::Queenside, false);
+            }
+            Square::H1 => self.set_can_castle(Color::White, CastlingType::Kingside, false),
+            Square::A1 => self.set_can_castle(Color::White, CastlingType::Queenside, false),
+
+            Square::E8 => {
+                self.set_can_castle(Color::Black, CastlingType::Kingside, false);
+                self.set_can_castle(Color::Black, CastlingType::Queenside, false);
+            }
+            Square::H8 => self.set_can_castle(Color::Black, CastlingType::Kingside, false),
+            Square::A8 => self.set_can_castle(Color::Black, CastlingType::Queenside, false),
+            _ => {}
+        }
     }
 
     pub fn get_pseudo_legal_moves(&self, square: Square) -> Option<Vec<Move>> {
@@ -200,6 +217,10 @@ impl Board {
             .iter()
             .filter(move |&&sq| self.get(sq).map_or(false, |p| p.piece_color == color))
             .copied()
+    }
+
+    fn set_can_castle(&mut self, color: Color, castling_type: CastlingType, can_castle: bool) {
+        self.castling_rights[color as usize][castling_type as usize] = can_castle;
     }
 }
 
