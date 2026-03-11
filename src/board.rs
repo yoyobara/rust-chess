@@ -13,16 +13,21 @@ use crate::{
 
 type BoardState = [Option<Piece>; 64];
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(
     feature = "serde-support",
     derive(serde::Serialize, serde::Deserialize)
 )]
-pub struct PlayerCastlingRights {
-    pub queenside: bool,
-    pub kingside: bool,
+pub enum CastlingType {
+    Kingside = 0,
+    Queenside = 1,
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(
+    feature = "serde-support",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub enum EndgameState {
     Checkmate,
     Stalemate,
@@ -37,17 +42,14 @@ pub struct Board {
     #[cfg_attr(feature = "serde-support", serde(with = "serde_big_array::BigArray"))]
     state: BoardState,
 
-    castling_rights: [PlayerCastlingRights; 2],
+    castling_rights: [[bool; 2]; 2],
 }
 
 impl Default for Board {
     fn default() -> Self {
         Self {
             state: Self::get_initial_state(),
-            castling_rights: [PlayerCastlingRights {
-                queenside: true,
-                kingside: true,
-            }; 2],
+            castling_rights: [[true; 2]; 2],
         }
     }
 }
@@ -56,10 +58,7 @@ impl Board {
     pub fn empty() -> Self {
         Self {
             state: [None; 64],
-            castling_rights: [PlayerCastlingRights {
-                queenside: true,
-                kingside: true,
-            }; 2],
+            castling_rights: [[true; 2]; 2],
         }
     }
 
@@ -92,8 +91,8 @@ impl Board {
         new_board
     }
 
-    pub const fn get_castling_rights(&self, color: Color) -> PlayerCastlingRights {
-        self.castling_rights[color as usize]
+    pub fn allowed_to_castle(&self, color: Color, castling_type: CastlingType) -> bool {
+        self.castling_rights[color as usize][castling_type as usize]
     }
 
     pub fn pretty_print(&self) {
@@ -150,13 +149,16 @@ impl Board {
             .collect()
     }
 
+    pub fn is_under_threat(&self, square: Square, threatening_color: Color) -> bool {
+        let opponent_pseudo_legal_moves = self.get_all_pseudo_legal_moves(threatening_color);
+
+        opponent_pseudo_legal_moves.iter().any(|mv| mv.to == square)
+    }
+
     pub fn is_under_check(&self, color: Color) -> bool {
         let king_square = self.find_king(color);
-        let opponent_pseudo_legal_moves = self.get_all_pseudo_legal_moves(!color);
 
-        opponent_pseudo_legal_moves
-            .iter()
-            .any(|mv| mv.to == king_square)
+        self.is_under_threat(king_square, !color)
     }
 
     pub fn get_legal_moves(&self, square: Square) -> Option<Vec<Move>> {
