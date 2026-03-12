@@ -3,7 +3,7 @@ use crate::{
     core::{
         chess_move::{Move, MoveType},
         color::Color,
-        piece::Piece,
+        piece::{Piece, PieceType},
         square::Square,
     },
 };
@@ -15,7 +15,7 @@ const QUEENSIDE_CLEAR_SQUARES_RELATIVE: [(i8, i8); 3] = [(-1, 0), (-2, 0), (-3, 
 const QUEENSIDE_DEST_SQUARE_RELATIVE: (i8, i8) = (-2, 0);
 
 fn is_square_castle_clear(board: &Board, square: Square, castling_color: Color) -> bool {
-    board.get(square).is_none() && board.is_under_threat(square, !castling_color)
+    board.get(square).is_none() && !board.is_under_threat(square, !castling_color)
 }
 
 fn can_castle(
@@ -25,6 +25,17 @@ fn can_castle(
     castling_type: CastlingType,
 ) -> bool {
     if !board.allowed_to_castle(color, castling_type) {
+        return false;
+    }
+
+    let rook_square = match (castling_type, color) {
+        (CastlingType::Kingside, Color::White) => Square::H1,
+        (CastlingType::Queenside, Color::White) => Square::A1,
+        (CastlingType::Kingside, Color::Black) => Square::H8,
+        (CastlingType::Queenside, Color::Black) => Square::A8,
+    };
+
+    if board.get(rook_square) != Some(Piece::new(PieceType::Rook, color)) {
         return false;
     }
 
