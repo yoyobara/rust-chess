@@ -1,7 +1,6 @@
 use crate::{
     core::{
-        board_view::BoardView,
-        chess_move::Move,
+        chess_move::{Move, MoveType},
         color::Color,
         piece::{Piece, PieceType},
         square::{ALL_SQUARES, Square},
@@ -14,16 +13,21 @@ use crate::{
 
 type BoardState = [Option<Piece>; 64];
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(
     feature = "serde-support",
     derive(serde::Serialize, serde::Deserialize)
 )]
-pub struct PlayerCastlingRights {
-    pub queenside: bool,
-    pub kingside: bool,
+pub enum CastlingType {
+    Kingside = 0,
+    Queenside = 1,
 }
 
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(
+    feature = "serde-support",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub enum EndgameState {
     Checkmate,
     Stalemate,
@@ -38,17 +42,14 @@ pub struct Board {
     #[cfg_attr(feature = "serde-support", serde(with = "serde_big_array::BigArray"))]
     state: BoardState,
 
-    castling_rights: [PlayerCastlingRights; 2],
+    castling_rights: [[bool; 2]; 2],
 }
 
 impl Default for Board {
     fn default() -> Self {
         Self {
             state: Self::get_initial_state(),
-            castling_rights: [PlayerCastlingRights {
-                queenside: true,
-                kingside: true,
-            }; 2],
+            castling_rights: [[true; 2]; 2],
         }
     }
 }
@@ -57,10 +58,7 @@ impl Board {
     pub fn empty() -> Self {
         Self {
             state: [None; 64],
-            castling_rights: [PlayerCastlingRights {
-                queenside: true,
-                kingside: true,
-            }; 2],
+            castling_rights: [[true; 2]; 2],
         }
     }
 
@@ -93,8 +91,8 @@ impl Board {
         new_board
     }
 
-    pub const fn get_castling_rights(&self, color: Color) -> PlayerCastlingRights {
-        self.castling_rights[color as usize]
+    pub fn allowed_to_castle(&self, color: Color, castling_type: CastlingType) -> bool {
+        self.castling_rights[color as usize][castling_type as usize]
     }
 
     pub fn pretty_print(&self) {
@@ -123,30 +121,44 @@ impl Board {
             .take()
             .expect("can't move empty square");
 
-        let captured_piece = self.get(mv.to);
-        assert_eq!(mv.captured, captured_piece.map(|p| p.piece_type));
-
         if let Some(promotion_type) = mv.promotion {
             moved_piece.piece_type = promotion_type;
         }
 
         *self.get_mut(mv.to) = Some(moved_piece);
-    }
 
-    pub fn revert_move(&mut self, mv: Move) {
-        let mut moved_piece = self
-            .get_mut(mv.to)
-            .take()
-            .expect("move's destination is empty");
-
-        if let Some(promoted_piece) = mv.promotion {
-            moved_piece.piece_type = PieceType::Pawn;
+        match (mv.move_type, moved_piece.piece_color) {
+            (MoveType::KingsideCastling, Color::White) => {
+                *self.get_mut(Square::F1) = self.get_mut(Square::H1).take();
+            }
+            (MoveType::QueensideCastling, Color::White) => {
+                *self.get_mut(Square::D1) = self.get_mut(Square::A1).take();
+            }
+            (MoveType::KingsideCastling, Color::Black) => {
+                *self.get_mut(Square::F8) = self.get_mut(Square::H8).take();
+            }
+            (MoveType::QueensideCastling, Color::Black) => {
+                *self.get_mut(Square::D8) = self.get_mut(Square::A8).take();
+            }
+            _ => {}
         }
 
-        *self.get_mut(mv.to) = mv
-            .captured
-            .map(|cap_type| Piece::new(cap_type, !moved_piece.piece_color));
-        *self.get_mut(mv.from) = Some(moved_piece);
+        match mv.from {
+            Square::E1 => {
+                self.set_can_castle(Color::White, CastlingType::Kingside, false);
+                self.set_can_castle(Color::White, CastlingType::Queenside, false);
+            }
+            Square::H1 => self.set_can_castle(Color::White, CastlingType::Kingside, false),
+            Square::A1 => self.set_can_castle(Color::White, CastlingType::Queenside, false),
+
+            Square::E8 => {
+                self.set_can_castle(Color::Black, CastlingType::Kingside, false);
+                self.set_can_castle(Color::Black, CastlingType::Queenside, false);
+            }
+            Square::H8 => self.set_can_castle(Color::Black, CastlingType::Kingside, false),
+            Square::A8 => self.set_can_castle(Color::Black, CastlingType::Queenside, false),
+            _ => {}
+        }
     }
 
     pub fn get_pseudo_legal_moves(&self, square: Square) -> Option<Vec<Move>> {
@@ -170,12 +182,16 @@ impl Board {
             .collect()
     }
 
-    pub fn is_under_check(&self, color: Color) -> bool {
-        let opponent_pseudo_legal_moves = self.get_all_pseudo_legal_moves(!color);
+    pub fn is_under_threat(&self, square: Square, threatening_color: Color) -> bool {
+        let opponent_pseudo_legal_moves = self.get_all_pseudo_legal_moves(threatening_color);
 
-        opponent_pseudo_legal_moves
-            .iter()
-            .any(|mv| mv.captured == Some(PieceType::King))
+        opponent_pseudo_legal_moves.iter().any(|mv| mv.to == square)
+    }
+
+    pub fn is_under_check(&self, color: Color) -> bool {
+        let king_square = self.find_king(color);
+
+        self.is_under_threat(king_square, !color)
     }
 
     pub fn get_legal_moves(&self, square: Square) -> Option<Vec<Move>> {
@@ -218,6 +234,10 @@ impl Board {
             .filter(move |&&sq| self.get(sq).map_or(false, |p| p.piece_color == color))
             .copied()
     }
+
+    fn set_can_castle(&mut self, color: Color, castling_type: CastlingType, can_castle: bool) {
+        self.castling_rights[color as usize][castling_type as usize] = can_castle;
+    }
 }
 
 impl std::fmt::Display for Board {
@@ -232,11 +252,5 @@ impl std::fmt::Display for Board {
             writeln!(f, "|")?;
         }
         writeln!(f, "+---+---+---+---+---+---+---+---+")
-    }
-}
-
-impl BoardView for Board {
-    fn get(&self, square: Square) -> Option<Piece> {
-        self.get(square)
     }
 }
