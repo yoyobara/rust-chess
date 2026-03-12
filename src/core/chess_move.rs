@@ -1,6 +1,10 @@
 use crate::core::{piece::PieceType, square::Square};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "serde-support",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub enum MoveType {
     Quiet,
     Capture,
@@ -9,6 +13,10 @@ pub enum MoveType {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "serde-support",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub struct Move {
     pub from: Square,
     pub to: Square,
