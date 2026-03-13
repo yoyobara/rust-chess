@@ -1,5 +1,6 @@
 use crate::{
-    board::{Board, CastlingType},
+    board::Board,
+    castling::{CastlingType, get_castling_data},
     core::{
         chess_move::{Move, MoveType},
         color::Color,
@@ -8,53 +9,20 @@ use crate::{
     },
 };
 
-const KINGSIDE_CLEAR_SQUARES_RELATIVE: [(i8, i8); 2] = [(1, 0), (2, 0)];
-const KINGSIDE_DEST_SQUARE_RELATIVE: (i8, i8) = (2, 0);
-
-const QUEENSIDE_CLEAR_SQUARES_RELATIVE: [(i8, i8); 3] = [(-1, 0), (-2, 0), (-3, 0)];
-const QUEENSIDE_DEST_SQUARE_RELATIVE: (i8, i8) = (-2, 0);
-
-fn is_square_castle_clear(board: &Board, square: Square, castling_color: Color) -> bool {
-    board.get(square).is_none() && !board.is_under_threat(square, !castling_color)
-}
-
-fn can_castle(
+// checks only for rook existence and empty squares between
+fn can_pseudo_castle(
     board: &Board,
     king_square: Square,
     color: Color,
     castling_type: CastlingType,
 ) -> bool {
-    if !board.allowed_to_castle(color, castling_type) {
-        return false;
-    }
+    let castling_data = get_castling_data(castling_type, color);
 
-    let rook_square = match (castling_type, color) {
-        (CastlingType::Kingside, Color::White) => Square::H1,
-        (CastlingType::Queenside, Color::White) => Square::A1,
-        (CastlingType::Kingside, Color::Black) => Square::H8,
-        (CastlingType::Queenside, Color::Black) => Square::A8,
-    };
-
-    if board.get(rook_square) != Some(Piece::new(PieceType::Rook, color)) {
-        return false;
-    }
-
-    let clear_squares_relative: &[(i8, i8)] = match castling_type {
-        CastlingType::Kingside => &KINGSIDE_CLEAR_SQUARES_RELATIVE,
-        CastlingType::Queenside => &QUEENSIDE_CLEAR_SQUARES_RELATIVE,
-    };
-
-    for &(df, dr) in clear_squares_relative {
-        if !is_square_castle_clear(
-            board,
-            king_square.get_relative_square(df, dr).unwrap(),
-            color,
-        ) {
-            return false;
-        }
-    }
-
-    true
+    board.get(castling_data.rook_src_square) == Some(Piece::new(PieceType::Rook, color))
+        && castling_data
+            .clear_squares
+            .iter()
+            .all(|&clear_square| board.get(clear_square).is_none())
 }
 
 pub fn get_king_pseudo_legal_moves(board: &Board, src_square: Square, piece: Piece) -> Vec<Move> {
@@ -83,17 +51,10 @@ pub fn get_king_pseudo_legal_moves(board: &Board, src_square: Square, piece: Pie
     }
 
     for castling_type in [CastlingType::Kingside, CastlingType::Queenside] {
-        if can_castle(board, src_square, piece.piece_color, castling_type) {
-            let (df, dr) = match castling_type {
-                CastlingType::Kingside => KINGSIDE_DEST_SQUARE_RELATIVE,
-                CastlingType::Queenside => QUEENSIDE_DEST_SQUARE_RELATIVE,
-            };
-
-            let dest = src_square.get_relative_square(df, dr).unwrap();
-
+        if can_pseudo_castle(board, src_square, piece.piece_color, castling_type) {
             moves.push(Move::new(
                 src_square,
-                dest,
+                get_castling_data(castling_type, piece.piece_color).king_dest_square,
                 None,
                 match castling_type {
                     CastlingType::Kingside => MoveType::KingsideCastling,

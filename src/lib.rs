@@ -2,5 +2,6 @@
 #![allow(unused_variables)]
 
 pub mod board;
+mod castling;
 pub mod core;
-pub mod movegen;
+mod movegen;
