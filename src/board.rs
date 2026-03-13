@@ -1,6 +1,7 @@
 use crate::{
+    castling::{CastlingType, get_castling_data},
     core::{
-        chess_move::{Move, MoveType},
+        chess_move::Move,
         color::Color,
         piece::{Piece, PieceType},
         square::{ALL_SQUARES, Square},
@@ -12,16 +13,6 @@ use crate::{
 };
 
 type BoardState = [Option<Piece>; 64];
-
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(
-    feature = "serde-support",
-    derive(serde::Serialize, serde::Deserialize)
-)]
-pub enum CastlingType {
-    Kingside = 0,
-    Queenside = 1,
-}
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(
@@ -110,7 +101,7 @@ impl Board {
         let mut king_squares = self.find_piece(Some(Piece::new(PieceType::King, color)));
         let only_king_square = king_squares.next().expect("king not found");
 
-        assert!(king_squares.next().is_none());
+        assert!(king_squares.next().is_none(), "two kings...");
 
         only_king_square
     }
@@ -127,22 +118,12 @@ impl Board {
 
         *self.get_mut(mv.to) = Some(moved_piece);
 
-        match (mv.move_type, moved_piece.piece_color) {
-            (MoveType::KingsideCastling, Color::White) => {
-                *self.get_mut(Square::F1) = self.get_mut(Square::H1).take();
-            }
-            (MoveType::QueensideCastling, Color::White) => {
-                *self.get_mut(Square::D1) = self.get_mut(Square::A1).take();
-            }
-            (MoveType::KingsideCastling, Color::Black) => {
-                *self.get_mut(Square::F8) = self.get_mut(Square::H8).take();
-            }
-            (MoveType::QueensideCastling, Color::Black) => {
-                *self.get_mut(Square::D8) = self.get_mut(Square::A8).take();
-            }
-            _ => {}
-        }
+        if let Some(castling_type) = mv.move_type.into() {
+            let castling_data = get_castling_data(castling_type, moved_piece.piece_color);
 
+            *self.get_mut(castling_data.rook_dest_square) =
+                self.get_mut(castling_data.rook_src_square).take();
+        }
         match mv.from {
             Square::E1 => {
                 self.set_can_castle(Color::White, CastlingType::Kingside, false);
@@ -198,9 +179,17 @@ impl Board {
         let color = self.get(square)?.piece_color;
         let pseudo_legal = self.get_pseudo_legal_moves(square)?;
 
+        let no_illegal_castling = pseudo_legal.iter().filter(|&&mv| {
+            if let Some(castling_type) = mv.move_type.into() {
+                if !self.is_castling_legal(color, castling_type) {
+                    return false;
+                }
+            }
+            true
+        });
+
         Some(
-            pseudo_legal
-                .iter()
+            no_illegal_castling
                 .filter(|&&mv| {
                     let mut board_clone = self.clone();
 
@@ -210,6 +199,23 @@ impl Board {
                 .copied()
                 .collect(),
         )
+    }
+
+    fn is_castling_legal(&self, color: Color, castling_type: CastlingType) -> bool {
+        if !self.allowed_to_castle(color, castling_type) {
+            return false;
+        };
+
+        let castling_data = get_castling_data(castling_type, color);
+
+        if self.is_under_threat(castling_data.king_src_square, !color) {
+            return false;
+        }
+
+        castling_data
+            .clear_squares
+            .iter()
+            .all(|&clear_square| !self.is_under_threat(clear_square, !color))
     }
 
     pub fn get_all_legal_moves(&self, color: Color) -> Vec<Move> {

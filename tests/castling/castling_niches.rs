@@ -29,7 +29,7 @@ fn queenside_castling_blocked_by_piece() {
 #[test]
 fn castling_through_check() {
     let mut b = setup_board_for_white_castling();
-    b.set(F8, Some(Piece::new(PieceType::Bishop, Color::Black))); // Attacks F1
+    b.set(A6, Some(Piece::new(PieceType::Bishop, Color::Black))); // attacks F1
 
     let available_moves = b.get_legal_moves(E1).unwrap();
     let kingside = Move::new(E1, G1, None, MoveType::KingsideCastling);
