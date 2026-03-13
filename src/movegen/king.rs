@@ -14,20 +14,13 @@ const KINGSIDE_DEST_SQUARE_RELATIVE: (i8, i8) = (2, 0);
 const QUEENSIDE_CLEAR_SQUARES_RELATIVE: [(i8, i8); 3] = [(-1, 0), (-2, 0), (-3, 0)];
 const QUEENSIDE_DEST_SQUARE_RELATIVE: (i8, i8) = (-2, 0);
 
-fn is_square_castle_clear(board: &Board, square: Square, castling_color: Color) -> bool {
-    board.get(square).is_none() && !board.is_under_threat(square, !castling_color)
-}
-
-fn can_castle(
+// checks only for rook existence and empty squares between
+fn can_pseudo_castle(
     board: &Board,
     king_square: Square,
     color: Color,
     castling_type: CastlingType,
 ) -> bool {
-    if !board.allowed_to_castle(color, castling_type) {
-        return false;
-    }
-
     let rook_square = match (castling_type, color) {
         (CastlingType::Kingside, Color::White) => Square::H1,
         (CastlingType::Queenside, Color::White) => Square::A1,
@@ -45,11 +38,10 @@ fn can_castle(
     };
 
     for &(df, dr) in clear_squares_relative {
-        if !is_square_castle_clear(
-            board,
-            king_square.get_relative_square(df, dr).unwrap(),
-            color,
-        ) {
+        if board
+            .get(king_square.get_relative_square(df, dr).unwrap())
+            .is_some()
+        {
             return false;
         }
     }
@@ -83,7 +75,7 @@ pub fn get_king_pseudo_legal_moves(board: &Board, src_square: Square, piece: Pie
     }
 
     for castling_type in [CastlingType::Kingside, CastlingType::Queenside] {
-        if can_castle(board, src_square, piece.piece_color, castling_type) {
+        if can_pseudo_castle(board, src_square, piece.piece_color, castling_type) {
             let (df, dr) = match castling_type {
                 CastlingType::Kingside => KINGSIDE_DEST_SQUARE_RELATIVE,
                 CastlingType::Queenside => QUEENSIDE_DEST_SQUARE_RELATIVE,
