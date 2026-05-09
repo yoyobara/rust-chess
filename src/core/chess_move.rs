@@ -8,6 +8,7 @@ use crate::core::{piece::PieceType, square::Square};
 pub enum MoveType {
     Quiet,
     Capture,
+    EnPassant,
     QueensideCastling,
     KingsideCastling,
 }

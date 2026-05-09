@@ -1,7 +1,7 @@
 use crate::{
     castling::{CastlingType, get_castling_data},
     core::{
-        chess_move::Move,
+        chess_move::{Move, MoveType},
         color::Color,
         piece::{Piece, PieceType},
         square::{ALL_SQUARES, Square},
@@ -34,6 +34,7 @@ pub struct Board {
     state: BoardState,
 
     castling_rights: [[bool; 2]; 2],
+    en_passant_square: Option<Square>,
 }
 
 impl Default for Board {
@@ -41,6 +42,7 @@ impl Default for Board {
         Self {
             state: Self::get_initial_state(),
             castling_rights: [[true; 2]; 2],
+            en_passant_square: None,
         }
     }
 }
@@ -50,7 +52,12 @@ impl Board {
         Self {
             state: [None; 64],
             castling_rights: [[true; 2]; 2],
+            en_passant_square: None,
         }
+    }
+
+    pub fn en_passant_square(&self) -> Option<Square> {
+        self.en_passant_square
     }
 
     pub fn get(&self, square: Square) -> Option<Piece> {
@@ -117,6 +124,20 @@ impl Board {
         }
 
         *self.get_mut(mv.to) = Some(moved_piece);
+
+        if mv.move_type == MoveType::EnPassant {
+            let capture_square = Square::from_file_rank((mv.to.file(), mv.from.rank())).unwrap();
+            *self.get_mut(capture_square) = None;
+        }
+
+        self.en_passant_square = if moved_piece.piece_type == PieceType::Pawn
+            && (mv.to.rank() - mv.from.rank()).abs() == 2
+        {
+            let en_passant_rank = (mv.to.rank() + mv.from.rank()) / 2;
+            Square::from_file_rank((mv.from.file(), en_passant_rank))
+        } else {
+            None
+        };
 
         if let Some(castling_type) = mv.move_type.into() {
             let castling_data = get_castling_data(castling_type, moved_piece.piece_color);

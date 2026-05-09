@@ -13,7 +13,7 @@ const PROMOTABLE_PIECE_TYPES: [PieceType; 4] = [Rook, Knight, Bishop, Queen];
 
 pub fn get_pawn_pseudo_legal_moves(board: &Board, src_square: Square, piece: Piece) -> Vec<Move> {
     let mut moves: Vec<Move> = Vec::new();
-    let (file, rank) = src_square.to_file_rank();
+    let (_, rank) = src_square.to_file_rank();
 
     // Direction depends on color: white moves +1 rank, black moves -1 rank
     let (forward_dir, start_rank, promotion_rank) = match piece.piece_color {
@@ -65,6 +65,8 @@ pub fn get_pawn_pseudo_legal_moves(board: &Board, src_square: Square, piece: Pie
                         moves.push(Move::new(src_square, dst, None, MoveType::Capture));
                     }
                 }
+            } else if Some(dst) == board.en_passant_square() {
+                moves.push(Move::new(src_square, dst, None, MoveType::EnPassant));
             }
         }
     }
